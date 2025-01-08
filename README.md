@@ -6,6 +6,17 @@ Arctis is an indexing framework and suite of lightweight tools for fetching, par
 
 Arctis comes with a simple CLI tool that can call the parsers.
 
+**Options:**
+```bash
+Parse blocks, transactions, or programs
+
+Usage: cli parse <COMMAND>
+
+Commands:
+  block  Parse a specific block
+  tx     Parse a specific transaction
+```
+
 ### Installation
 
 #### Compile from source
