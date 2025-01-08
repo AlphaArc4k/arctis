@@ -1,3 +1,104 @@
+use colored::Colorize;
+use anyhow::{anyhow, Result};
+use tokio::sync::Semaphore;
+
+pub enum BlockStrategy {
+    SlotFetch,
+    BlocksWS,
+    Geyser
+}
+
+async fn monitor_blocks_ws(
+    ws_rpc_url: &str,
+    block_sender: mpsc::Sender<Option<(UiConfirmedBlock, i64, u64)>>,
+  ) -> Result<u8> {
+    
+    let ws_rpc_url = ws_rpc_url.to_string();
+    
+    // Start subscription in separate task
+    tokio::spawn(async move {
+  
+      let mut slot_notification_client ;
+  
+      // loop for automatic reconnect
+      loop {
+        println!("Subscribing to block notifications");
+  
+        slot_notification_client = PubsubClient::new(&ws_rpc_url.to_string()).await.unwrap();
+  
+        let block_config = RpcBlockSubscribeConfig {
+          encoding: Some(UiTransactionEncoding::Json), // perf: base64 > json >> base58 > binary
+          transaction_details: Some(solana_transaction_status::TransactionDetails::Full),
+          commitment: Some(CommitmentConfig::confirmed()),
+          max_supported_transaction_version: Some(0),
+          show_rewards: None,
+        };
+  
+        match slot_notification_client
+          .block_subscribe(RpcBlockSubscribeFilter::All, Some(block_config))
+          .await
+        {
+          Ok((mut slot_subscription, slot_unsubscribe)) => {
+            while let Some(slot_info) = slot_subscription.next().await {
+              let val = slot_info.value;
+              if val.block.is_none() {
+                println!("{}", "Received block notification without block".red());
+                continue;
+              }
+  
+              let slot = val.slot;
+  
+              // TODO detect if blocks are sequential and fetch missing if it's the case
+              let ts_now = get_ts_precise();
+              let block = val.block.unwrap();
+              let block_time = block.block_time.unwrap_or(0);
+              let diff_to_now = (ts_now / 1000) - block_time;
+              log_metrics(slot, 0, diff_to_now, 0, 0);
+  
+              let _ = block_sender.send(Some((block, ts_now, slot))).await;
+            }
+            println!("Websocket was killed - trying to reconnect");
+            slot_unsubscribe().await;
+          },
+          Err(e) => {
+            println!("Error subscribing to blocks: {:?}", e);
+            sleep(Duration::from_secs(5)).await;
+          }
+        }
+      }
+    });
+  
+    Ok(1)
+}
+
+
+pub async fn monitor_blocks(
+    rpc_client: &Arc<RpcClient>,
+    ws_rpc_url: &str,
+    block_sender: mpsc::Sender<Option<(UiConfirmedBlock, i64, u64)>>,
+    strategy: BlockStrategy,
+) -> Result<()>
+{
+    println!("Monitoring blocks...");
+
+    match strategy {
+      BlockStrategy::SlotFetch => {
+        // monitor_blocks_slot_fetch(rpc_client, ws_rpc_url, block_sender).await?;
+      },
+      BlockStrategy::BlocksWS => {
+        monitor_blocks_ws(ws_rpc_url, block_sender).await?;
+        return Ok(());
+      },
+      BlockStrategy::Geyser => {
+          // monitor_blocks_geyser(rpc_client, ws_rpc_url, block_sender).await?;
+      },
+      _ => {
+        panic!("Unhandled block strategy");
+      }
+    }
+
+    Ok(())
+}
 
 
 pub async fn get_block_with_retries(
