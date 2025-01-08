@@ -2,6 +2,52 @@
 
 Arctis is an indexing framework and suite of lightweight tools for fetching, parsing, and transforming Solana blockchain data written in **Rust**. Inspired by Paradigm's [Cryo](https://github.com/paradigmxyz/cryo), it takes a similar modular approach to blockchain data processing but introduces some bigger changes, most notably the use of **DuckDB** as the transformation engine and a design specifically optimized for Solana's much higher throughput.
 
+## Getting Started
+
+### Installation
+
+#### Compile from source
+
+```bash
+git clone https://github.com/AlphaArc4k/arctis.git
+cd arctis
+```
+This method requires having rust installed. See rustup for instructions.
+
+**Example 1:** Getting all swaps on pumfun in block 312740977
+
+```bash
+cargo run parse block 312740977 --dataset swaps --filter pumpfun
+```
+
+Example output
+```bash
+
+#############################################
+########     AlphaArc Arctis CLI     ########
+#############################################
+
+Parse block: 312740977
++----------------------+-----------------------+------------+-----------+-------+---------------+-----------------+-----------+-----------+----------------...
+| amount_in            | amount_out            | block_time | dex       | error | signature     | signer          | slot      | swap_type | token          ...
++----------------------+-----------------------+------------+-----------+-------+---------------+-----------------+-----------+-----------+----------------...
+| 1.0557094812393188   | 30787216.0            | 1736370445 | "Pumpfun" | false | "3xzBwFwC..." | "BPdVE9EsoD..." | 312740977 | "Buy"     | "BmbRrWLyewsLkX...
++----------------------+-----------------------+------------+-----------+-------+---------------+-----------------+-----------+-----------+----------------...
+| 0.5                  | 8592061.0             | 1736370445 | "Pumpfun" | false | "2NE8xoUY..." | "3s7mt8RftK..." | 312740977 | "Buy"     | "Ea7V3B5wAsCMAe...
++----------------------+-----------------------+------------+-----------+-------+---------------+-----------------+-----------+-----------+----------------...
+| 0.1001456379890442   | 351248.1875           | 1736370445 | "Pumpfun" | false | "3qoC2bje..." | "PCDq7Rrvd..."  | 312740977 | "Buy"     | "zivexzyFKqt6Ka...
++----------------------+-----------------------+------------+-----------+-------+---------------+-----------------+-----------+-----------+----------------...
+| 0.4995000064373016   | 13620355.0            | 1736370445 | "Pumpfun" | false | "w8s6gYn..."  | "2Pxqib8fg...." | 312740977 | "Buy"     | "81kpUi8VsL5uS8...
+ ...
+ ```
+
+**Example 2:** Parsing all program instructiosn of a single transaction
+
+```bash
+cargo run parse tx 5iAwxu7rdRbyUk9N3CtuYdzpK5V864zbSCMvJ7vbGTZaRNBQKZYiK6itBxATdijfitLd2A3ZDYXP1R7GfmrP4fF7
+```
+
+
 ## How It Works
 
 1. **RPC Calls with Chunking**  
