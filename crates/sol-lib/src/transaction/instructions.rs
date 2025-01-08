@@ -4,6 +4,22 @@ use solana_sdk::{instruction::CompiledInstruction, message::AccountKeys, pubkey:
 use solana_transaction_status::{parse_instruction::ParsedInstruction, UiCompiledInstruction};
 use anyhow::Result;
 
+pub struct InstructionWrapper<'a> {
+  pub ix: &'a UiCompiledInstruction,
+  pub ix_idx: usize,
+  pub pix_idx: u8,
+}
+
+impl<'a> InstructionWrapper<'a> {
+  pub fn new(ix: &'a UiCompiledInstruction, ix_idx: usize, pix_idx: u8) -> Self {
+    Self {
+      ix,
+      ix_idx,
+      pix_idx,
+    }
+  }
+}
+
 
 pub fn parse_compiled_instruction(compiled_instruction: &CompiledInstruction, accounts: &Vec<String>, stack_height: Option<u32>) -> Result<ParsedInstruction> {
   let program_id = accounts[compiled_instruction.program_id_index as usize].clone();
