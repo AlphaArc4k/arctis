@@ -1,3 +1,5 @@
+pub mod tx;
+
 pub mod parsers;
 pub mod wrapper;
 pub mod helper;

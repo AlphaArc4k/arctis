@@ -127,7 +127,7 @@ pub struct SplTokenTransfer {
 }
 
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Serialize, Debug, PartialEq, Clone)]
 pub struct AccountInfo {
   pub account: String,
   pub owner: String,
@@ -139,13 +139,13 @@ pub struct AccountInfo {
   pub decimals: Option<u8>,
 } 
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Serialize, Debug, PartialEq, Clone)]
 pub enum SupplyChangeType {
   Mint,
   Burn,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Serialize, Debug, PartialEq, Clone)]
 pub struct SupplyChange {
   pub signature: String,
   pub ix_index: usize,
@@ -159,7 +159,7 @@ pub struct SupplyChange {
 }
 
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Serialize, Debug, PartialEq, Clone)]
 pub enum ComputeBudgetInstruction {
   SetComputeUnitLimit(u32),
   SetComputeUnitPrice(f64),
@@ -172,14 +172,14 @@ pub struct BlockInfo {
   pub block_time: i64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Debug, Clone)]
 pub struct ParserResult {
   pub parsed: bool,
   pub ix_type: String,
   pub data: ParserResultData,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Serialize, Debug, PartialEq, Clone)]
 pub enum ParserResultData {
   ComputeBudget(ComputeBudgetInstruction),
   SolTransfer(SolTransfer),

@@ -41,7 +41,7 @@ pub fn process_transaction(
   // store all parser results
   let mut parsed_ix = vec![];
 
-  let mut discard_reason = Some(DiscardReason::Unknown);
+  let mut discard_reason = None;
 
   if tx.is_error() {
     // TODO we might not want to discard failed tx
@@ -158,8 +158,12 @@ pub fn process_transaction(
     can_discard &= _can_discard;
   }
 
-  if can_discard && discard_reason.is_none() {
-    discard_reason = Some(DiscardReason::Processed);
+  if discard_reason.is_none() {
+    if can_discard {
+      discard_reason = Some(DiscardReason::Processed);
+    } else {
+      discard_reason = Some(DiscardReason::Unknown);
+    }
   }
 
   let mut processed_tx = ProcessedTransaction {

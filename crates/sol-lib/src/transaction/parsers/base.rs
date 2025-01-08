@@ -2,7 +2,7 @@ use arctis_types::{BlockInfo, ParserResult, ParserResultData};
 use anyhow::Result;
 use crate::transaction::{wrapper::TransactionWrapper, InstructionWrapper};
 
-use super::{associated_token_account::AssociatedTokenAccountProgramParser, compute_budget::ComputeBudgetProgramParser, sequence_enforcer::SequenceEnforcerParser, system_program::SystemProgramParser, token_program::TokenProgramParser};
+use super::{associated_token_account::AssociatedTokenAccountProgramParser, compute_budget::ComputeBudgetProgramParser, pumpfun::PumpfunParser, sequence_enforcer::SequenceEnforcerParser, system_program::SystemProgramParser, token_program::TokenProgramParser};
 
 pub trait Parser {
   // oix is the program-specific instruction index (relative to program not transaction)
@@ -51,7 +51,7 @@ pub fn get_parser(program_id: &str) -> Option<Box<dyn Parser>> {
       // Jupiter DCA program
       // "DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M" => Some(Box::new(JupiterDCAParser)),
       // Pumpfun
-      // "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P" => Some(Box::new(PumpfunParser)),
+      "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P" => Some(Box::new(PumpfunParser)),
       // Raydium AMM Router
       "routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS" => Some(Box::new(NoopParser)),
       // https://github.com/Ellipsis-Labs/phoenix-v1

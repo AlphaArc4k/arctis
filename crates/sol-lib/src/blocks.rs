@@ -1,6 +1,23 @@
-use colored::Colorize;
+use std::sync::Arc;
+use solana_client::{
+  nonblocking::{
+    pubsub_client::PubsubClient, 
+    rpc_client::RpcClient
+  }, 
+  rpc_config::{RpcBlockConfig, RpcBlockSubscribeConfig, RpcBlockSubscribeFilter}
+};
+use solana_sdk::commitment_config::CommitmentConfig;
+use solana_transaction_status::{UiConfirmedBlock, UiTransactionEncoding};
 use anyhow::{anyhow, Result};
-use tokio::sync::Semaphore;
+use crate::utils::get_ts_precise;
+
+use {
+  futures::stream::StreamExt,
+  tokio::{
+      sync::mpsc,
+      time::{sleep, Duration},
+  },
+};
 
 pub enum BlockStrategy {
     SlotFetch,
@@ -42,7 +59,7 @@ async fn monitor_blocks_ws(
             while let Some(slot_info) = slot_subscription.next().await {
               let val = slot_info.value;
               if val.block.is_none() {
-                println!("{}", "Received block notification without block".red());
+                // println!("{}", "Received block notification without block".red());
                 continue;
               }
   
@@ -51,9 +68,11 @@ async fn monitor_blocks_ws(
               // TODO detect if blocks are sequential and fetch missing if it's the case
               let ts_now = get_ts_precise();
               let block = val.block.unwrap();
+              /*
               let block_time = block.block_time.unwrap_or(0);
               let diff_to_now = (ts_now / 1000) - block_time;
-              log_metrics(slot, 0, diff_to_now, 0, 0);
+              TODO log_metrics(slot, 0, diff_to_now, 0, 0);
+               */
   
               let _ = block_sender.send(Some((block, ts_now, slot))).await;
             }
@@ -73,7 +92,7 @@ async fn monitor_blocks_ws(
 
 
 pub async fn monitor_blocks(
-    rpc_client: &Arc<RpcClient>,
+    _rpc_client: &Arc<RpcClient>,
     ws_rpc_url: &str,
     block_sender: mpsc::Sender<Option<(UiConfirmedBlock, i64, u64)>>,
     strategy: BlockStrategy,
@@ -92,9 +111,6 @@ pub async fn monitor_blocks(
       BlockStrategy::Geyser => {
           // monitor_blocks_geyser(rpc_client, ws_rpc_url, block_sender).await?;
       },
-      _ => {
-        panic!("Unhandled block strategy");
-      }
     }
 
     Ok(())
@@ -158,7 +174,7 @@ pub async fn get_block_with_retries(
   
   }
 
-
+  /*
   async fn get_block_with_cache(
     slot: u64,
     block_cache: &Arc<dyn sol_lib::cache::JsonBlockCache>,
@@ -245,3 +261,4 @@ pub async fn get_block_with_retries(
     };
   
   }
+   */

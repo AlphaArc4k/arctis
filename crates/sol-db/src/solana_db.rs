@@ -1,5 +1,6 @@
 use arctis_types::{DexType, EncodedTransactionWithStatusMeta, NewToken, ParserResult, SolTransfer, SplTokenTransfer, SupplyChange, SwapInfo, SwapType};
 use duckdb::{arrow::{array::Array, datatypes::DataType}, params, types::{EnumType, ListType}, Connection, Result};
+use serde::Serialize;
 use serde_json::{json, Value};
 
 use crate::utils::print_json_objects_as_table;
@@ -19,7 +20,7 @@ struct TokenStats {
   pub unique_signers: i64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Debug, Clone)]
 pub struct ProgramParserData {
   pub signature: String,
   pub ix_idx: u8,
@@ -29,6 +30,7 @@ pub struct ProgramParserData {
   pub error: bool,
 }
 
+#[derive(Serialize, Debug, Clone)]
 pub struct ProcessedTransaction {
   pub slot: u64,
   pub block_time: i64,
