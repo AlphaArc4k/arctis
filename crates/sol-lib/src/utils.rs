@@ -1,4 +1,6 @@
+use chrono::DateTime;
 
+pub const WSOL : &str = "So11111111111111111111111111111111111111112";
 
 pub fn get_ts_now() -> u64 {
     let now = std::time::SystemTime::now();
@@ -33,3 +35,8 @@ pub fn env_is_set(var_name: &str) -> bool {
         _ => false
     }
 }
+
+pub fn format_with_decimals(amount: u64, decimals: u8) -> f64 {
+    let amount = amount as f64;
+    return amount / 10u64.pow(decimals as u32) as f64;
+  }
