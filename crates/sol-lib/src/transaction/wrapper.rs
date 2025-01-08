@@ -108,9 +108,11 @@ impl TransactionWrapper {
     return lookup;
   }
 
-  pub fn get_inner_token_transfers(&self, program_id: &str) -> Result<Vec<SplTokenTransfer>> {
+  pub fn get_inner_token_transfers(&self, _program_id: &str) -> Result<Vec<SplTokenTransfer>> {
+    /*
     let accounts = self.get_accounts().clone();
     let tx = self.get_tx();
+    */
     // return get_inner_token_transfers(&tx, program_id, &accounts);
     return Err(anyhow::anyhow!("Not implemented"));
   }
