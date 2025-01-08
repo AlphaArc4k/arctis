@@ -1,6 +1,6 @@
+use arctis_types::{DexType, EncodedTransactionWithStatusMeta, NewToken, ParserResult, SolTransfer, SplTokenTransfer, SupplyChange, SwapInfo, SwapType};
 use duckdb::{arrow::{array::Array, datatypes::DataType}, params, types::{EnumType, ListType}, Connection, Result};
 use serde_json::{json, Value};
-use anyhow::anyhow;
 
 use crate::utils::print_json_objects_as_table;
 
@@ -290,6 +290,7 @@ impl SolanaDatabase {
 
   pub fn get_temp_dir(&self) -> Option<String> {
     // FIXME get from config
+    None
   }
 
   pub fn get_file_name(&self, with_extension: bool) -> Option<String> {
@@ -413,7 +414,7 @@ impl SolanaDatabase {
                   }
                 },
                 // handle arrays
-                duckdb::types::ValueRef::List(v, i) => {
+                duckdb::types::ValueRef::List(v, _i) => {
                   match v {
                     ListType::Regular(t) => {
                       let arr_data_type = t.value_type();
@@ -717,8 +718,8 @@ impl SolanaDatabase {
         signer: row.get(2)?,
         signature: row.get(3)?,
         error: row.get(4)?,
-        dex: DexType::from_db(&dex_type_str)?,
-        swap_type: SwapType::from_db(&swap_type_str)?,
+        dex: DexType::from_db(&dex_type_str).unwrap(),
+        swap_type: SwapType::from_db(&swap_type_str).unwrap(),
         amount_in: row.get(7)?,
         token_in: row.get(8)?,
         amount_out: row.get(9)?,
@@ -727,11 +728,6 @@ impl SolanaDatabase {
     })?;
     let swaps: Result<Vec<_>> = swaps_iter.collect();
     swaps
-  }
-
-  pub fn purge_all(&mut self) -> Result<()> {
-    self.purge_swaps()?;
-    Ok(())
   }
 
   pub fn load_parquet_table(&self, table: &str, file_path: &str) -> Result<()> {
@@ -751,7 +747,7 @@ impl SolanaDatabase {
 
   pub fn print_table_with_limit(&self, table: &str, limit: i32) -> Result<()> {
     let query = format!("SELECT * FROM {} limit {}", table, limit);
-    let results = self.query_to_json(&query)?;
+    let results = self.query_to_json_file(&query)?;
     print_json_objects_as_table(&results);
     Ok(())
   }
