@@ -29,8 +29,8 @@ This method requires having rust installed. See [rustup](https://rustup.rs/) for
 
 ### Configuration
 
-Create a config file:
-```toml title=config.timl
+Create a config.toml file:
+```toml title=config.toml
 [rpc]
 solana_rpc_url = "https://<your rpc>"
 solana_ws_url = "wss://<your ws rpc>"
