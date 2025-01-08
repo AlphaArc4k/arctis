@@ -4,6 +4,8 @@ Arctis is an indexing framework and suite of lightweight tools for fetching, par
 
 ## Getting Started
 
+Arctis comes with a simple CLI tool that can call the parsers.
+
 ### Installation
 
 #### Compile from source
