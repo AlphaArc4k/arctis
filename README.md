@@ -12,9 +12,18 @@ Arctis is an indexing framework and suite of lightweight tools for fetching, par
 git clone https://github.com/AlphaArc4k/arctis.git
 cd arctis
 ```
-This method requires having rust installed. See rustup for instructions.
+This method requires having rust installed. See [rustup](https://rustup.rs/) for instructions.
 
-**Example 1:** Getting all swaps on pumfun in block 312740977
+### Configuration
+
+Create a config file:
+```toml title=config.timl
+[rpc]
+solana_rpc_url = "https://<your rpc>"
+solana_ws_url = "wss://<your ws rpc>"
+```
+
+**Example 1:** Getting all swaps on pumpfun in block 312740977
 
 ```bash
 cargo run parse block 312740977 --dataset swaps --filter pumpfun
@@ -41,7 +50,7 @@ Parse block: 312740977
  ...
  ```
 
-**Example 2:** Parsing all program instructiosn of a single transaction
+**Example 2:** Parsing all program instructions of a single transaction
 
 ```bash
 cargo run parse tx 5iAwxu7rdRbyUk9N3CtuYdzpK5V864zbSCMvJ7vbGTZaRNBQKZYiK6itBxATdijfitLd2A3ZDYXP1R7GfmrP4fF7
