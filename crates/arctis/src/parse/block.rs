@@ -31,7 +31,7 @@ pub fn process_block(block: &UiConfirmedBlock, solana_db: &mut SolanaDatabase) -
     let ts_start_process_tx = Instant::now();
     let mut processed_tx = vec![];
     for tx in transactions {
-        let ptx = process_transaction(&tx, slot, block_time);
+        let ptx = process_transaction(tx, slot, block_time);
         match ptx {
             Ok(ptx) => processed_tx.push(ptx),
             Err(_err) => {
@@ -185,7 +185,7 @@ fn write_transactions_with_instructions_db(
     }
 
     // insert fees
-    let fees: Vec<ComputeBudgetProcessed> = fees.into_iter().map(|(_, v)| v).collect();
+    let fees: Vec<ComputeBudgetProcessed> = fees.into_values().collect();
     let res = solana_db.insert_compute_budget_bulk(&fees);
     if res.is_err() {
         return Err(anyhow!("Failed to insert fees"));

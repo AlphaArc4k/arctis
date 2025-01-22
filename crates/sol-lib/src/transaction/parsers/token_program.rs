@@ -21,7 +21,7 @@ impl Parser for TokenProgramParser {
 
         let signature = tx.get_signature();
 
-        let ix_parsed = parse_ui_instruction(&ix.ix, &accounts).unwrap();
+        let ix_parsed = parse_ui_instruction(ix.ix, &accounts).unwrap();
 
         let ix_type = ix_parsed.parsed["type"].as_str().unwrap();
 
@@ -29,28 +29,28 @@ impl Parser for TokenProgramParser {
             // https://github.com/solana-labs/solana-program-library/blob/master/token/program/src/processor.rs#L229
             "transfer" => {
                 let parsed = &ix_parsed.parsed["info"];
-                let spl_transfer = parse_transfer(&parsed, tx, block, signature);
-                return Ok(ParserResult {
+                let spl_transfer = parse_transfer(parsed, tx, block, signature);
+                Ok(ParserResult {
                     parsed: true,
                     ix_type: "transfer".to_string(),
                     data: ParserResultData::TokenTransfer(spl_transfer),
-                });
+                })
             }
             "transferChecked" => {
                 let parsed = &ix_parsed.parsed["info"];
-                let spl_transfer = parse_transfer(&parsed, tx, block, signature);
-                return Ok(ParserResult {
+                let spl_transfer = parse_transfer(parsed, tx, block, signature);
+                Ok(ParserResult {
                     parsed: true,
                     ix_type: "transfer".to_string(),
                     data: ParserResultData::TokenTransfer(spl_transfer),
-                });
+                })
             }
             "approve" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "approve".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             // https://github.com/solana-labs/solana-program-library/blob/master/token/program/src/instruction.rs#L214
             "closeAccount" => {
@@ -92,11 +92,11 @@ impl Parser for TokenProgramParser {
                     account_info.decimals = Some(account.decimals);
                 }
 
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: true,
                     ix_type: "closeAccount".to_string(),
                     data: ParserResultData::Account(account_info),
-                });
+                })
             }
             // https://github.com/solana-labs/solana-program-library/blob/master/token/program/src/instruction.rs#L65
             "initializeAccount" => {
@@ -133,70 +133,70 @@ impl Parser for TokenProgramParser {
                     account_info.decimals = Some(account.decimals);
                 }
 
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: true,
                     ix_type: "initializeAccount".to_string(),
                     data: ParserResultData::Account(account_info),
-                });
+                })
             }
             "initializeAccount2" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "initializeAccount2".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             "initializeAccount3" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "initializeAccount3".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             "initializeImmutableOwner" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "initializeImmutableOwner".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             "approveChecked" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "approveChecked".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             // https://github.com/solana-labs/solana-program-library/blob/master/token/program/src/instruction.rs#L378
             "syncNative" => {
                 // this does not really impact calculations
                 // it is often used by bonk when sol is moved in wrapped sol accounts to sync the balance change
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: true,
                     ix_type: "syncNative".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             "initializeMint" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "initializeMint".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             "mintTo" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "mintTo".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             "mintToChecked" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "mintToChecked".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             "burn" => {
                 let signature = tx.get_signature();
@@ -209,48 +209,48 @@ impl Parser for TokenProgramParser {
                 let amount = parsed["amount"].as_str().unwrap().parse::<u64>().unwrap();
 
                 let supply_change = SupplyChange {
-                    signature: signature,
+                    signature,
                     ix_index: ix.ix_idx,
                     account: account.to_string(),
                     mint: mint.to_string(),
                     authority: authority.to_string(),
-                    amount: amount as i128 * -1,
+                    amount: -(amount as i128),
                     // change_type: SupplyChangeType::Burn,
                 };
 
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: true,
                     ix_type: "burn".to_string(),
                     data: ParserResultData::Supply(supply_change),
-                });
+                })
             }
             "burnChecked" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "burnChecked".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             "setAuthority" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "setAuthority".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             "revoke" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "revoke".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             _ => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: ix_type.to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
         }
     }
@@ -278,14 +278,11 @@ fn parse_transfer(
     let mut spl_transfer = SplTokenTransfer {
         slot: *slot,
         block_time: *block_time,
-        signature: signature,
+        signature,
         from_acc: parsed["source"].as_str().unwrap().to_string(),
         to_acc: parsed["destination"].as_str().unwrap().to_string(),
-        amount: amount,
-        authority: match parsed["authority"].as_str() {
-            Some(a) => Some(a.to_string()),
-            None => None,
-        },
+        amount,
+        authority: parsed["authority"].as_str().map(|a| a.to_string()),
         // derived values
         from: None,
         to: None,

@@ -158,10 +158,10 @@ pub async fn get_block_with_retries(
         }
     }
 
-    return Err(anyhow!(
+    Err(anyhow!(
         "Failed to fetch block after {} retries",
         block_retries
-    ));
+    ))
 }
 
 /*

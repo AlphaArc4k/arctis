@@ -15,7 +15,7 @@ impl Parser for ComputeBudgetProgramParser {
         _tx: &TransactionWrapper,
         _block: &BlockInfo,
     ) -> Result<ParserResult> {
-        let parsed = parse_compute_budget_instruction(&ix.ix)?;
+        let parsed = parse_compute_budget_instruction(ix.ix)?;
         Ok(ParserResult {
             parsed: true,
             ix_type: match parsed {
@@ -40,14 +40,14 @@ pub fn parse_compute_budget_instruction(
     let data_buf = decode(inst_data).into_vec().unwrap();
 
     // u8 discriminator: 2 = SetComputeUnitLimit | 3 = SetComputeUnitPrice
-    let d = data_buf.get(0);
+    let d = data_buf.first();
     if d == Some(&1) {
         return Ok(ComputeBudgetInstruction::RequestHeapFrame);
     }
     if d == Some(&2) {
         let limit_bytes = &data_buf[1..5];
         let limit = u32::from_le_bytes(limit_bytes.try_into().unwrap());
-        return Ok(ComputeBudgetInstruction::SetComputeUnitLimit(limit));
+        Ok(ComputeBudgetInstruction::SetComputeUnitLimit(limit))
     } else if d == Some(&3) {
         let fee_bytes = &data_buf[1..9];
         let fee = u64::from_le_bytes(fee_bytes.try_into().unwrap());

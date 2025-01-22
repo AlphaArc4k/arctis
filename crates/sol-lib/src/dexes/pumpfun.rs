@@ -143,15 +143,15 @@ pub fn pumpfun_event_to_swap(
         slot,
         block_time,
         signer: accounts[0].clone(),
-        signature: signature,
+        signature,
         error: false,
         dex: DexType::Pumpfun,
-        swap_type: swap_type,
-        amount_in: amount_in,
-        token_in: token_in,
-        amount_out: amount_out,
-        token_out: token_out,
+        swap_type,
+        amount_in,
+        token_in,
+        amount_out,
+        token_out,
     };
 
-    return Ok(Some(swap_info));
+    Ok(Some(swap_info))
 }

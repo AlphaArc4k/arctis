@@ -31,31 +31,31 @@ impl TransactionWrapper {
     }
 
     pub fn get_accounts(&self) -> Vec<String> {
-        return self.accounts.clone();
+        self.accounts.clone()
     }
 
     fn get_tx(&self) -> &EncodedTransactionWithStatusMeta {
-        return &self.tx;
+        &self.tx
     }
 
     pub fn get_signer(&self) -> String {
-        return self.get_accounts()[0].clone();
+        self.get_accounts()[0].clone()
     }
 
     pub fn get_signature(&self) -> String {
-        return get_transaction_signature(&self.tx);
+        get_transaction_signature(&self.tx)
     }
 
     pub fn get_signatures(&self) -> Vec<String> {
-        return get_transaction_signatures(&self.tx);
+        get_transaction_signatures(&self.tx)
     }
 
     fn is_multisig(&self) -> bool {
-        return self.get_signatures().len() > 1;
+        self.get_signatures().len() > 1
     }
 
     pub fn is_error(&self) -> bool {
-        return has_error(&self.tx);
+        has_error(&self.tx)
     }
 
     pub fn get_version(&self) -> i8 {
@@ -69,54 +69,54 @@ impl TransactionWrapper {
     }
 
     pub fn get_compute_units_consumed(&self) -> u64 {
-        return self
+        self
             .tx
             .meta
             .as_ref()
             .unwrap()
             .compute_units_consumed
             .clone()
-            .unwrap_or(0);
+            .unwrap_or(0)
     }
 
     pub fn get_fee(&self) -> u64 {
-        return self.tx.meta.as_ref().unwrap().fee;
+        self.tx.meta.as_ref().unwrap().fee
     }
 
     fn get_transaction_data(&self) -> &UiTransaction {
-        return get_transaction_data(&self.tx);
+        get_transaction_data(&self.tx)
     }
 
     fn get_transaction_message(&self) -> &UiRawMessage {
-        return get_transaction_message(&self.tx);
+        get_transaction_message(&self.tx)
     }
 
     pub fn get_transaction_meta(&self) -> &UiTransactionStatusMeta {
-        return get_transaction_meta(&self.tx);
+        get_transaction_meta(&self.tx)
     }
 
     pub fn get_instructions(&self) -> Vec<UiCompiledInstruction> {
         let message = self.get_transaction_message();
-        return message.instructions.clone();
+        message.instructions.clone()
     }
 
     pub fn get_inner_ix_count(&self) -> u8 {
         let meta = self.get_transaction_meta();
-        return meta
+        meta
             .inner_instructions
             .as_ref()
-            .map_or(0, |inner| inner.len() as u8);
+            .map_or(0, |inner| inner.len() as u8)
     }
 
     pub fn get_inner_instructions(&self, program_id: &str) -> Result<Vec<UiCompiledInstruction>> {
-        return get_inner_instructions(&self.tx, program_id);
+        get_inner_instructions(&self.tx, program_id)
     }
 
     pub fn get_account_lookup(&self) -> HashMap<String, TokenAccountInfo> {
         let accounts = self.get_accounts().clone();
         let tx = self.get_tx();
-        let lookup = get_token_account_lookup(tx, &accounts, false);
-        return lookup;
+        
+        get_token_account_lookup(tx, &accounts, false)
     }
 
     pub fn get_inner_token_transfers(&self, _program_id: &str) -> Result<Vec<SplTokenTransfer>> {
@@ -125,11 +125,11 @@ impl TransactionWrapper {
         let tx = self.get_tx();
         */
         // return get_inner_token_transfers(&tx, program_id, &accounts);
-        return Err(anyhow::anyhow!("Not implemented"));
+        Err(anyhow::anyhow!("Not implemented"))
     }
 
     pub fn get_token_decimals(&self, mint: &str) -> Result<u8> {
-        return get_token_decimals(&self.tx, mint);
+        get_token_decimals(&self.tx, mint)
     }
 
     pub fn get_log_messages(&self) -> Option<Vec<String>> {
@@ -137,6 +137,6 @@ impl TransactionWrapper {
         let OptionSerializer::Some(logs) = logs else {
             return None;
         };
-        return Some(logs);
+        Some(logs)
     }
 }

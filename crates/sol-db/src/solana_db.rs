@@ -657,7 +657,7 @@ impl SolanaDatabase {
                 transfer.sol
             ])?;
         }
-        return Ok(transfers.len());
+        Ok(transfers.len())
     }
 
     pub fn insert_token_transfers_bulk(
@@ -681,7 +681,7 @@ impl SolanaDatabase {
                 transfer.authority
             ])?;
         }
-        return Ok(transfers.len());
+        Ok(transfers.len())
     }
 
     pub fn insert_swaps_bulk(&mut self, swaps: &Vec<&SwapInfo>) -> Result<usize> {
@@ -708,7 +708,7 @@ impl SolanaDatabase {
                 token
             ])?;
         }
-        return Ok(swaps.len());
+        Ok(swaps.len())
     }
 
     pub fn insert_tokens_bulk(&mut self, tokens: &Vec<&NewToken>) -> Result<usize> {
@@ -730,7 +730,7 @@ impl SolanaDatabase {
                 token.uri
             ])?;
         }
-        return Ok(tokens.len());
+        Ok(tokens.len())
     }
 
     pub fn insert_supply_changes_bulk(
@@ -748,7 +748,7 @@ impl SolanaDatabase {
                 supply_change.authority
             ])?;
         }
-        return Ok(supply_changes.len());
+        Ok(supply_changes.len())
     }
 
     pub fn insert_parsed_programs_bulk(
@@ -767,7 +767,7 @@ impl SolanaDatabase {
                 program.error
             ])?;
         }
-        return Ok(programs.len());
+        Ok(programs.len())
     }
 
     pub fn insert_compute_budget_bulk(
@@ -785,7 +785,7 @@ impl SolanaDatabase {
                 budget.fee
             ])?;
         }
-        return Ok(budget.len());
+        Ok(budget.len())
     }
 
     pub fn get_swaps(&self) -> Result<Vec<SwapInfo>> {

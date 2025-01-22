@@ -22,7 +22,7 @@ pub async fn parse_block(block_number: u64, ctx: &ExecutionContext) -> Result<So
             Ok(sol_db)
         }
         None => {
-            return Err(anyhow!("Block not found"));
+            Err(anyhow!("Block not found"))
         }
     }
 }

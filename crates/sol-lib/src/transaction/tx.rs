@@ -12,7 +12,7 @@ pub async fn get_transaction(
     rpc_client: &Arc<RpcClient>,
     signature: &str,
 ) -> Result<EncodedConfirmedTransactionWithStatusMeta> {
-    let sig = Signature::from_str(&signature)?;
+    let sig = Signature::from_str(signature)?;
 
     let config = RpcTransactionConfig {
         // encoding: Some(UiTransactionEncoding::JsonParsed),

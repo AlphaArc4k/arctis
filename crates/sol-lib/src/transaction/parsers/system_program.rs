@@ -17,7 +17,7 @@ impl Parser for SystemProgramParser {
         let BlockInfo { slot, block_time } = block;
 
         let accounts = tx.get_accounts();
-        let ix_parsed = parse_ui_instruction(&ix.ix, &accounts).unwrap();
+        let ix_parsed = parse_ui_instruction(ix.ix, &accounts).unwrap();
 
         if ix_parsed.program_id != "11111111111111111111111111111111" {
             return Err(anyhow!("Invalid program id: {}", ix_parsed.program_id));
@@ -31,7 +31,7 @@ impl Parser for SystemProgramParser {
                 let sol_transfer = SolTransfer {
                     slot: *slot,
                     block_time: *block_time,
-                    signature: signature,
+                    signature,
                     from: ix_parsed.parsed["info"]["source"]
                         .as_str()
                         .unwrap()
@@ -43,11 +43,11 @@ impl Parser for SystemProgramParser {
                     lamports: ix_parsed.parsed["info"]["lamports"].as_u64().unwrap(),
                     sol: lamports_to_sol(ix_parsed.parsed["info"]["lamports"].as_u64().unwrap()),
                 };
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: true,
                     ix_type: "transfer".to_string(),
                     data: ParserResultData::SolTransfer(sol_transfer),
-                });
+                })
             }
             "createAccountWithSeed" => {
                 let parsed = &ix_parsed.parsed["info"];
@@ -70,53 +70,53 @@ impl Parser for SystemProgramParser {
                     decimals: None,
                 };
 
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: true,
                     ix_type: "createAccountWithSeed".to_string(),
                     data: ParserResultData::Account(account_info),
-                });
+                })
             }
             "createAccount" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "createAccount".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             "initializeNonce" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "initializeNonce".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             "advanceNonce" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "advanceNonce".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             "withdrawFromNonce" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "withdrawFromNonce".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             "transferWithSeed" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "transferWithSeed".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             _ => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: ix_type.to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
         }
     }

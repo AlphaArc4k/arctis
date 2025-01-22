@@ -14,10 +14,10 @@ impl Parser for SequenceEnforcerParser {
         _tx: &TransactionWrapper,
         _block: &BlockInfo,
     ) -> Result<ParserResult> {
-        return Ok(ParserResult {
+        Ok(ParserResult {
             parsed: true,
             ix_type: "sequence_enforcer".to_string(),
             data: ParserResultData::NoData,
-        });
+        })
     }
 }

@@ -28,7 +28,7 @@ impl Parser for PumpfunParser {
             .filter_map(|log| log.strip_prefix("Program data: "))
             .collect::<Vec<&str>>();
 
-        if logs.len() == 0 {
+        if logs.is_empty() {
             return Err(anyhow!("No pumpfun logs found"));
         } else if logs.len() <= pump_idx as usize {
             return Err(anyhow!("Pumpfun: Invalid pumpfun index"));
@@ -55,11 +55,11 @@ impl Parser for PumpfunParser {
                     initial_supply: Some(1_000_000_000), // TODO get from MintTo inner ix
                     supply: Some(1_000_000_000),
                 };
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: true,
                     ix_type: "Create".to_string(),
                     data: ParserResultData::Token(create),
-                });
+                })
             }
             PumpfunEventType::Trade(trade_event) => {
                 let swap_info = pumpfun_event_to_swap(&trade_event, tx, *slot, *block_time)?;
@@ -72,25 +72,25 @@ impl Parser for PumpfunParser {
                 }
                 let swap_info = swap_info.unwrap();
                 let ix_type = format!("Trade{}", swap_info.swap_type.to_db());
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: true,
                     ix_type,
                     data: ParserResultData::Swap(swap_info),
-                });
+                })
             }
             PumpfunEventType::SetParams(_) => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: true,
                     ix_type: "SetParams".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             PumpfunEventType::Complete(_) => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: true,
                     ix_type: "Complete".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
         }
     }

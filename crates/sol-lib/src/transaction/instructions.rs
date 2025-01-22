@@ -25,7 +25,7 @@ impl<'a> InstructionWrapper<'a> {
 
 pub fn parse_compiled_instruction(
     compiled_instruction: &CompiledInstruction,
-    accounts: &Vec<String>,
+    accounts: &[String],
     stack_height: Option<u32>,
 ) -> Result<ParsedInstruction> {
     let program_id = accounts[compiled_instruction.program_id_index as usize].clone();
@@ -33,13 +33,13 @@ pub fn parse_compiled_instruction(
 
     let account_keys: Vec<Pubkey> = accounts
         .iter()
-        .map(|key| Pubkey::from_str(&key).unwrap())
+        .map(|key| Pubkey::from_str(key).unwrap())
         .collect();
     let account_keys = AccountKeys::new(&account_keys, None);
 
     let parsed = solana_transaction_status::parse_instruction::parse(
         &program_id,
-        &compiled_instruction,
+        compiled_instruction,
         &account_keys,
         stack_height,
     )?;
@@ -49,7 +49,7 @@ pub fn parse_compiled_instruction(
 
 pub fn parse_ui_instruction(
     ui_compiled_instruction: &UiCompiledInstruction,
-    accounts: &Vec<String>,
+    accounts: &[String],
 ) -> Result<ParsedInstruction> {
     let compiled_instruction = CompiledInstruction {
         program_id_index: ui_compiled_instruction.program_id_index,
@@ -58,9 +58,9 @@ pub fn parse_ui_instruction(
             .into_vec()
             .unwrap(),
     };
-    return parse_compiled_instruction(
+    parse_compiled_instruction(
         &compiled_instruction,
         accounts,
         ui_compiled_instruction.stack_height,
-    );
+    )
 }

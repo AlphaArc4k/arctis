@@ -18,7 +18,7 @@ impl Parser for AssociatedTokenAccountProgramParser {
         let ix = &ix.ix;
 
         let accounts = tx.get_accounts();
-        let ix_parsed = parse_ui_instruction(&ix, &accounts).unwrap();
+        let ix_parsed = parse_ui_instruction(ix, &accounts).unwrap();
 
         if ix_parsed.program_id != "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL" {
             return Err(anyhow!("Invalid program id: {}", ix_parsed.program_id));
@@ -31,36 +31,36 @@ impl Parser for AssociatedTokenAccountProgramParser {
                 // println!("{:?}", parsed);
                 let signature = tx.get_signature();
                 let account_info = parse_create(parsed, signature);
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: true,
                     ix_type: "createIdempotent".to_string(),
                     data: ParserResultData::Account(account_info),
-                });
+                })
             }
             "createIdempotent" => {
                 let parsed = &ix_parsed.parsed["info"];
                 // println!("{:?}", parsed);
                 let signature = tx.get_signature();
                 let account_info = parse_create(parsed, signature);
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: true,
                     ix_type: "createIdempotent".to_string(),
                     data: ParserResultData::Account(account_info),
-                });
+                })
             }
             "recoverNested" => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: "recoverNested".to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
             _ => {
-                return Ok(ParserResult {
+                Ok(ParserResult {
                     parsed: false,
                     ix_type: ix_type.to_string(),
                     data: ParserResultData::NoData,
-                });
+                })
             }
         }
     }

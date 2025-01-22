@@ -35,7 +35,7 @@ pub fn has_error(transaction: &EncodedTransactionWithStatusMeta) -> bool {
     transaction
         .meta
         .as_ref()
-        .map_or(false, |meta| meta.status.is_err())
+        .is_some_and(|meta| meta.status.is_err())
 }
 
 pub fn get_transaction_signature(transaction: &EncodedTransactionWithStatusMeta) -> String {
@@ -89,7 +89,7 @@ pub fn get_token_decimals(
             return Ok(decimals);
         }
     }
-    return Err(anyhow!("Token decimals not found"));
+    Err(anyhow!("Token decimals not found"))
 }
 
 #[derive(Serialize, Debug)]
@@ -108,7 +108,7 @@ pub struct TokenAccountInfo {
  */
 pub fn get_token_account_lookup(
     tx: &EncodedTransactionWithStatusMeta,
-    accounts: &Vec<String>,
+    accounts: &[String],
     _include_closed: bool,
 ) -> HashMap<String, TokenAccountInfo> {
     let meta = get_transaction_meta(tx);
@@ -142,12 +142,12 @@ pub fn get_token_account_lookup(
                 lookup.insert(
                     address.clone(),
                     TokenAccountInfo {
-                        address: address,
-                        mint: mint,
-                        decimals: decimals,
+                        address,
+                        mint,
+                        decimals,
                         amount_pre: amount,
                         amount_post: 0.0,
-                        owner: owner,
+                        owner,
                         is_closed: false,
                     },
                 );
@@ -176,19 +176,19 @@ pub fn get_token_account_lookup(
                 lookup.insert(
                     address.clone(),
                     TokenAccountInfo {
-                        address: address,
-                        mint: mint,
-                        decimals: decimals,
+                        address,
+                        mint,
+                        decimals,
                         amount_pre: 0.0,
                         amount_post: amount,
-                        owner: owner,
+                        owner,
                         is_closed: false,
                     },
                 );
             }
         }
     }
-    return lookup;
+    lookup
 }
 
 #[derive(Serialize, Debug, Clone)]
@@ -206,8 +206,8 @@ fn get_transaction_instructions_with_inner(
     transaction: &EncodedTransactionWithStatusMeta,
     program_id_filter: Option<&str>,
 ) -> Vec<ExtendedCompiledInstruction> {
-    let message = get_transaction_message(&transaction);
-    let meta = get_transaction_meta(&transaction);
+    let message = get_transaction_message(transaction);
+    let meta = get_transaction_meta(transaction);
     let accounts = get_accounts(message, meta);
 
     let inner_instructions = &meta.inner_instructions;
@@ -217,7 +217,7 @@ fn get_transaction_instructions_with_inner(
     for instruction in &message.instructions {
         let program_id = accounts[instruction.program_id_index as usize].clone();
         // if a program id filter is provided, skip instructions that don't match
-        if program_id_filter.is_some() && program_id != program_id_filter.clone().unwrap() {
+        if program_id_filter.is_some() && program_id != program_id_filter.unwrap() {
             i += 1;
             continue;
         }
@@ -246,7 +246,7 @@ fn get_transaction_instructions_with_inner(
         let inst_ex = ExtendedCompiledInstruction {
             instruction_index: i,
             program_id_index: instruction.program_id_index,
-            program_id: program_id,
+            program_id,
             accounts: instruction.accounts.clone(),
             data: instruction.data.clone(),
             stack_height: instruction.stack_height,
@@ -265,12 +265,12 @@ pub fn get_inner_instructions(
     let top_level_instructions =
         get_transaction_instructions_with_inner(transaction, Some(program_id));
     if top_level_instructions.len() != 1 {
-        if top_level_instructions.len() == 0 {
+        if top_level_instructions.is_empty() {
             return Err(anyhow!("No top level instruction found"));
         }
         return Err(anyhow!("Too many top-level instructions: expected 1"));
     }
     let top_instruction = &top_level_instructions[0];
     let instruction_inner = top_instruction.inner_instructions.clone();
-    return Ok(instruction_inner);
+    Ok(instruction_inner)
 }

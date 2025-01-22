@@ -24,12 +24,12 @@ pub fn get_approx_slot_diff(block_time: i64, ts: i64) -> i64 {
     // empirical value to minimize requests
     let blocks_per_second: f64 = 1000.0 / 458.93;
     let ts_diff = (block_time - ts) as f64;
-    let slot_diff = (ts_diff * blocks_per_second).round() as i64;
-    slot_diff
+    
+    (ts_diff * blocks_per_second).round() as i64
 }
 
 pub fn format_block_time(block_time: i64) -> String {
-    let d = DateTime::from_timestamp(block_time as i64, 0).unwrap();
+    let d = DateTime::from_timestamp(block_time, 0).unwrap();
     d.format("%Y-%m-%d %H:%M:%S").to_string()
 }
 
@@ -42,5 +42,5 @@ pub fn env_is_set(var_name: &str) -> bool {
 
 pub fn format_with_decimals(amount: u64, decimals: u8) -> f64 {
     let amount = amount as f64;
-    return amount / 10u64.pow(decimals as u32) as f64;
+    amount / 10u64.pow(decimals as u32) as f64
 }

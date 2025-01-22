@@ -32,11 +32,11 @@ pub fn get_settings() -> Result<Settings, ConfigError> {
     match Settings::new() {
         Ok(settings) => {
             // println!("Loaded settings: {:?}", settings);
-            return Ok(settings);
+            Ok(settings)
         }
         Err(e) => {
             println!("Failed to load settings: {:?}", e);
-            return Err(e);
+            Err(e)
         }
     }
 }

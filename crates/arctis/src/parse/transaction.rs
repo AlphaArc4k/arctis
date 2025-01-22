@@ -77,10 +77,7 @@ pub fn process_transaction(
     let ix_len = top_level_instructions.len();
     let inner_ix_count = tx.get_inner_ix_count();
 
-    let block_info = BlockInfo {
-        slot: slot,
-        block_time: block_time,
-    };
+    let block_info = BlockInfo { slot, block_time };
 
     /* can happen: see https://solscan.io/tx/X571pNgdt4ny636Gtefyhibg2ezqZ7WQHpoUachTrrRYE12hC4f1UT1hMBbbR9QXJYHB35qYjv4LHatHsdQ6gQa
     if ix_len == 0 {
@@ -93,19 +90,15 @@ pub fn process_transaction(
 
     let accounts = tx.get_accounts();
 
-    for ix_idx in 0..ix_len {
-        let ix = &top_level_instructions[ix_idx];
+    for (ix_idx, ix) in top_level_instructions.iter().enumerate() {
         let program_id = accounts[ix.program_id_index as usize].clone();
         let ix_idx = ix_idx as u8;
 
         // we're throwing away vote tx
-        match program_id.as_str() {
-            "Vote111111111111111111111111111111111111111" => {
-                discard_reason = Some(DiscardReason::Vote);
-                can_discard = true;
-                continue;
-            }
-            _ => {}
+        if program_id.as_str() == "Vote111111111111111111111111111111111111111" {
+            discard_reason = Some(DiscardReason::Vote);
+            can_discard = true;
+            continue;
         }
 
         // if e.g. raydium has multiple swaps, we need to keep track which one we are processing to find the correct log
@@ -131,7 +124,7 @@ pub fn process_transaction(
 
         // parse program instruction
         let parser = parser.unwrap();
-        let ix_wrapped = InstructionWrapper::new(&ix, ix_idx as usize, *program_ix_index);
+        let ix_wrapped = InstructionWrapper::new(ix, ix_idx as usize, *program_ix_index);
         let result = parser.parse(&ix_wrapped, &tx, &block_info);
         if result.is_err() {
             // TODO log errors println!("Failed to parse: program {}  sig {} ix: {} err {:?}", program_id, signature, ix_idx, result.err().unwrap());
@@ -159,11 +152,9 @@ pub fn process_transaction(
 
         let ix_type = &result.ix_type;
         let _can_discard = match &result.data {
-            ParserResultData::NoData => match ix_type.as_str() {
-                "syncNative" => true,
-                "sequence_enforcer" => true,
-                _ => false,
-            },
+            ParserResultData::NoData => {
+                matches!(ix_type.as_str(), "syncNative" | "sequence_enforcer")
+            }
             // TODO handle unknown data type
             _ => true,
         };
@@ -184,16 +175,16 @@ pub fn process_transaction(
     }
 
     let mut processed_tx = ProcessedTransaction {
-        slot: slot,
-        block_time: block_time,
-        signature: signature,
+        slot,
+        block_time,
+        signature,
         signer: signer.clone(),
-        has_error: has_error,
+        has_error,
         top_level_ix_count: ix_len as u8,
-        inner_ix_count: inner_ix_count,
-        compute_units_consumed: compute_units_consumed,
-        fee: fee,
-        version: version,
+        inner_ix_count,
+        compute_units_consumed,
+        fee,
+        version,
         parsed_programs,
         parsed_ix,
         is_discarded: true,
@@ -201,11 +192,11 @@ pub fn process_transaction(
         data: None,
     };
 
-    if can_discard == false {
+    if !can_discard {
         processed_tx.is_discarded = false;
         processed_tx.discard_reason = None;
         // TODO make setting
         processed_tx.data = None; // Some(tx.tx); // don't write all the data during testing
     }
-    return Ok(processed_tx);
+    Ok(processed_tx)
 }
