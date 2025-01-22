@@ -1,4 +1,3 @@
-
 pub mod config;
-pub mod run;
 pub mod parse;
+pub mod run;
