@@ -6,6 +6,7 @@ use arctis_types::{BlockInfo, ParserResult, ParserResultData};
 use super::associated_token_account::AssociatedTokenAccountProgramParser;
 use super::compute_budget::ComputeBudgetProgramParser;
 use super::pumpfun::PumpfunParser;
+use super::raydium::RaydiumAmmParser;
 use super::sequence_enforcer::SequenceEnforcerParser;
 use super::system_program::SystemProgramParser;
 use super::token_program::TokenProgramParser;
@@ -56,7 +57,7 @@ pub fn get_parser(program_id: &str) -> Option<Box<dyn Parser>> {
 
         // ########################## DEXES ##########################
         // Raydium v4
-        // "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8" => Some(Box::new(RaydiumAmmParser)),
+        "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8" => Some(Box::new(RaydiumAmmParser)),
         // Openbook V2
         "opnb2LAfJYbRMAHHvqjCwQxanZn7ReEHp1k81EohpZb" => Some(Box::new(NoopParser)),
         // Jupiter Aggregator v6
