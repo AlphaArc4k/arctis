@@ -54,40 +54,41 @@ pub async fn get_test_transaction(sig: &str) -> EncodedConfirmedTransactionWithS
 
     dotenvy::dotenv().ok();
 
-    let rpc_url = std::env::var("solana_rpc_url").unwrap();
+    let rpc_url = std::env::var("solana_rpc_url")
+        .unwrap_or("https://api.mainnet-beta.solana.com".to_string());
     let rpc_client = get_client(&rpc_url);
 
     // TODO cache transaction
-    let tx = crate::transaction::tx::get_transaction(&rpc_client, sig).await.unwrap();
-    tx
-
+    crate::transaction::tx::get_transaction(&rpc_client, sig)
+        .await
+        .unwrap()
 }
 
-#[cfg(test)]
-use solana_transaction_status::UiCompiledInstruction;
 #[cfg(test)]
 use crate::transaction::wrapper::TransactionWrapper;
 #[cfg(test)]
 use arctis_types::BlockInfo;
+#[cfg(test)]
+use solana_transaction_status::UiCompiledInstruction;
 
 #[cfg(test)]
 pub struct TestData {
-  pub tx: TransactionWrapper,
-  pub block_info: BlockInfo,
-  pub ix: UiCompiledInstruction
+    pub tx: TransactionWrapper,
+    pub block_info: BlockInfo,
+    pub ix: UiCompiledInstruction,
 }
 
 #[cfg(test)]
 pub async fn get_test_data(sig: &str, ix_index: usize) -> TestData {
-  let tx = get_test_transaction(sig).await;
-  let block_info = BlockInfo {
-    slot: tx.slot,
-    block_time: tx.block_time.unwrap(),
-  };
-  let tx = TransactionWrapper::new(tx.transaction);
+    let tx = get_test_transaction(sig).await;
+    let block_info = BlockInfo {
+        slot: tx.slot,
+        block_time: tx.block_time.unwrap(),
+    };
+    let tx = TransactionWrapper::new(tx.transaction);
 
-  let top_level_ix = tx.get_instructions();
-  let ix = top_level_ix[ix_index].clone();
+    let top_level_ix = tx.get_instructions();
+    let ix = top_level_ix[ix_index].clone();
 
-  TestData { tx, block_info, ix }
+    TestData { tx, block_info, ix }
 }

@@ -1146,6 +1146,73 @@ dependencies = [
 ]
 
 [[package]]
+name = "carbon-core"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a7dae390ab6c42de8fce10971f8cbe156893cb133b957c08b2cf5a2d61cbd03d"
+dependencies = [
+ "async-trait",
+ "borsh 0.10.4",
+ "bs58 0.5.1",
+ "carbon-macros",
+ "carbon-proc-macros",
+ "futures",
+ "log",
+ "serde",
+ "serde_json",
+ "solana-client",
+ "solana-sdk",
+ "solana-transaction-status",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-util",
+]
+
+[[package]]
+name = "carbon-macros"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "071b744ba6ebeaa2b9ea60c8c3b463d0280d4f034265ba3fd9d2ac696e8db70e"
+dependencies = [
+ "hex",
+ "paste",
+ "solana-client",
+ "solana-sdk",
+ "solana-transaction-status",
+]
+
+[[package]]
+name = "carbon-proc-macros"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b088582d0c5e28f01f2d1a107cdfbf904ed245d66326eaace77e9a8c4d913258"
+dependencies = [
+ "borsh-derive-internal 0.10.4",
+ "hex",
+ "paste",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "solana-client",
+ "solana-sdk",
+ "solana-transaction-status",
+ "syn 1.0.109",
+ "unicode-xid",
+]
+
+[[package]]
+name = "carbon-raydium-amm-v4-decoder"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e50af85b4c7639d881f3b25ecf9df30ccb945c1649fa4951dd649ad691b57601"
+dependencies = [
+ "carbon-core",
+ "serde",
+ "serde-big-array",
+ "solana-sdk",
+]
+
+[[package]]
 name = "cast"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2346,6 +2413,12 @@ name = "hermit-abi"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fbf6a919d6cf397374f7dfeeea91d974c7c0a7221d0d0f4f20d859d329e53fcc"
+
+[[package]]
+name = "hex"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
 name = "histogram"
@@ -4483,6 +4556,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde-big-array"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11fc7cc2c76d73e0f27ee52abbd64eec84d46f370c88371120433196934e4b7f"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "serde_bytes"
 version = "0.11.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4697,6 +4779,8 @@ dependencies = [
  "async-trait",
  "base64 0.22.1",
  "bincode",
+ "carbon-core",
+ "carbon-raydium-amm-v4-decoder",
  "chrono",
  "dotenvy",
  "futures",
