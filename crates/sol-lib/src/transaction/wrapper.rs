@@ -42,6 +42,13 @@ impl TransactionWrapper {
         self.get_accounts()[0].clone()
     }
 
+    pub fn get_signers(&self) -> Vec<String> {
+        self.get_accounts()
+            .into_iter()
+            .take(self.get_signatures().len())
+            .collect()
+    }
+
     pub fn get_signature(&self) -> String {
         get_transaction_signature(&self.tx)
     }
@@ -69,8 +76,7 @@ impl TransactionWrapper {
     }
 
     pub fn get_compute_units_consumed(&self) -> u64 {
-        self
-            .tx
+        self.tx
             .meta
             .as_ref()
             .unwrap()
@@ -102,8 +108,7 @@ impl TransactionWrapper {
 
     pub fn get_inner_ix_count(&self) -> u8 {
         let meta = self.get_transaction_meta();
-        meta
-            .inner_instructions
+        meta.inner_instructions
             .as_ref()
             .map_or(0, |inner| inner.len() as u8)
     }
@@ -115,7 +120,7 @@ impl TransactionWrapper {
     pub fn get_account_lookup(&self) -> HashMap<String, TokenAccountInfo> {
         let accounts = self.get_accounts().clone();
         let tx = self.get_tx();
-        
+
         get_token_account_lookup(tx, &accounts, false)
     }
 
