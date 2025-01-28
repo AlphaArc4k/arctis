@@ -6,8 +6,8 @@ use anyhow::anyhow;
 use arctis_types::{BlockInfo, DexType, ParserResult, ParserResultData, SwapInfo, SwapType};
 use carbon_core::deserialize::CarbonDeserialize;
 use carbon_jupiter_swap_decoder::instructions::swap_event::SwapEvent;
+use indexmap::IndexMap;
 use std::cmp::Ordering;
-use std::collections::HashMap;
 
 pub struct JupiterV6Parser;
 
@@ -46,59 +46,35 @@ impl Parser for JupiterV6Parser {
                 // if there are multiple swap events,
                 // for example, token_1 -> SOL -> token_2 -> token_3
                 // we only care about the token_1 and token_3 swap
-                // capture all the input and output swap event
-                // example: inputs -> [token_1, SOL, token_2]
-                //          outputs -> [SOL, token_2, token_3]
-                let (mut inputs, mut outputs) = swap_events.into_iter().fold(
-                    (HashMap::new(), HashMap::new()),
+                // merge amounts from swap with same input + output
+                let merged_swap_events = swap_events.into_iter().fold(
+                    IndexMap::<String, SwapEvent>::new(),
                     |mut acc, swap| {
-                        acc.0
-                            .entry(swap.input_mint)
-                            .and_modify(|val| *val += swap.input_amount)
-                            .or_insert(swap.input_amount);
-
-                        acc.1
-                            .entry(swap.output_mint)
-                            .and_modify(|val| *val += swap.output_amount)
-                            .or_insert(swap.output_amount);
-
+                        let key = format!("{}-{}", swap.input_mint, swap.output_mint);
+                        acc.entry(key)
+                            .and_modify(|val| {
+                                val.input_amount += swap.input_amount;
+                                val.output_amount += swap.output_amount;
+                            })
+                            .or_insert(swap);
                         acc
                     },
                 );
 
-                // collect all the comment tokens between inputs and output
-                // Example: common keys -> [SOL, token_2]
-                let common_keys: Vec<_> = inputs
-                    .iter()
-                    .filter_map(|(key, _)| {
-                        if outputs.contains_key(key) {
-                            Some(*key)
-                        } else {
-                            None
-                        }
-                    })
-                    .collect();
+                // we create a swap event with first and last swap
+                let (_, first_swap) = merged_swap_events
+                    .first()
+                    .ok_or(anyhow!("failed to get first swap"))?;
+                let (_, last_swap) = merged_swap_events
+                    .last()
+                    .ok_or(anyhow!("failed to get last swap"))?;
 
-                // remove all the common tokens between inputs and outputs
-                for key in common_keys {
-                    inputs.remove(&key);
-                    outputs.remove(&key);
-                }
-
-                // once the common keys are removed from inputs and output
-                // inputs and outputs will contain just first token_in and last token_out respectively
-                // Example: Inputs -> [token_1]
-                //          Outputs -> [token_3]
-                // we create a swap event with input token and output token.
-                // we just the first token from input and output using `next`
-                let input = inputs.into_iter().next().ok_or(anyhow!("Invalid swap"))?;
-                let output = outputs.into_iter().next().ok_or(anyhow!("Invalid swap"))?;
                 let swap_event = SwapEvent {
                     amm: Default::default(),
-                    input_mint: input.0,
-                    input_amount: input.1,
-                    output_mint: output.0,
-                    output_amount: output.1,
+                    input_mint: first_swap.input_mint,
+                    input_amount: first_swap.input_amount,
+                    output_mint: last_swap.output_mint,
+                    output_amount: last_swap.output_amount,
                 };
                 parse_swap_instruction(swap_event, block, tx)
             }
@@ -349,6 +325,45 @@ mod tests {
                 token_in: "EBGaJP7srpUUN8eRdta1MsojrNtweuHYsdP3P1TRpump".to_string(),
                 amount_out: 266_372.411808,
                 token_out: "HNg5PYJmtqcmzXrv6S9zP1CDKk5BgDuyFBxbvNApump".to_string(),
+                block_time: block_info.block_time,
+            })
+        );
+    }
+
+    #[tokio::test]
+    async fn test_jup_parse_arbitrage() {
+        // token for token swap
+        let sig = "4LyPRzAnyWAQZ8ZpE9TD4QRu3NF2vG2XWeSW2G4ekLM6SzztRfuLVmDuabcQTCjyExxhetAk2E3uPaXmYUpxiC5W";
+        let ix_index = 2;
+        let jup_ix_index = 0;
+
+        let TestData { tx, block_info, ix } = get_test_data(sig, ix_index).await;
+        let ix = InstructionWrapper::new(&ix, ix_index, jup_ix_index);
+
+        let parser = get_parser("JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4").unwrap();
+        let res = parser.parse(&ix, &tx, &block_info).unwrap();
+
+        let ParserResult {
+            parsed,
+            ix_type: _,
+            data,
+        } = res;
+
+        assert!(parsed);
+
+        assert_eq!(
+            data,
+            ParserResultData::Swap(SwapInfo {
+                slot: block_info.slot,
+                signer: tx.get_signer(),
+                signature: tx.get_signature(),
+                error: false,
+                dex: DexType::Jupiterv6,
+                swap_type: SwapType::Buy,
+                amount_in: 50.507282721,
+                token_in: "So11111111111111111111111111111111111111112".to_string(),
+                amount_out: 50.615414038,
+                token_out: "So11111111111111111111111111111111111111112".to_string(),
                 block_time: block_info.block_time,
             })
         );
