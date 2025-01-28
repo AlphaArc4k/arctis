@@ -1,8 +1,3 @@
-use crate::transaction::wrapper::TransactionWrapper;
-use crate::transaction::InstructionWrapper;
-use anyhow::Result;
-use arctis_types::{BlockInfo, ParserResult, ParserResultData};
-
 use super::associated_token_account::AssociatedTokenAccountProgramParser;
 use super::compute_budget::ComputeBudgetProgramParser;
 use super::pumpfun::PumpfunParser;
@@ -10,6 +5,11 @@ use super::raydium::RaydiumAmmParser;
 use super::sequence_enforcer::SequenceEnforcerParser;
 use super::system_program::SystemProgramParser;
 use super::token_program::TokenProgramParser;
+use crate::transaction::parsers::jupiter::JupiterV6Parser;
+use crate::transaction::wrapper::TransactionWrapper;
+use crate::transaction::InstructionWrapper;
+use anyhow::Result;
+use arctis_types::{BlockInfo, ParserResult, ParserResultData};
 
 pub trait Parser {
     // oix is the program-specific instruction index (relative to program not transaction)
@@ -61,7 +61,7 @@ pub fn get_parser(program_id: &str) -> Option<Box<dyn Parser>> {
         // Openbook V2
         "opnb2LAfJYbRMAHHvqjCwQxanZn7ReEHp1k81EohpZb" => Some(Box::new(NoopParser)),
         // Jupiter Aggregator v6
-        // "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4" => Some(Box::new(JupiterV6Parser)),
+        "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4" => Some(Box::new(JupiterV6Parser)),
         // Jupiter Aggregator v4
         "JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB" => Some(Box::new(NoopParser)),
         // Jupiter DCA program

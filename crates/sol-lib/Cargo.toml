@@ -28,4 +28,5 @@ bincode = "1.3.3"
 
 arctis-types = { path = "../arctis-types" }
 carbon-raydium-amm-v4-decoder = {version = "0.4.0"}
+carbon-jupiter-swap-decoder = "0.4.0"
 carbon-core = "0.4.0"

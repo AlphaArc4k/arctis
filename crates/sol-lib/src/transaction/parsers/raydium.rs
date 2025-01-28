@@ -97,8 +97,10 @@ fn parse_swap_instruction(
 
     let swap_type = if token_in.0 == WSOL {
         SwapType::Buy
-    } else {
+    } else if token_out.0 == WSOL {
         SwapType::Sell
+    } else {
+        SwapType::Token
     };
 
     let swap_info = SwapInfo {
