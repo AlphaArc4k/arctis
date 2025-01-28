@@ -19,6 +19,8 @@ impl Parser for JupiterV6Parser {
         tx: &TransactionWrapper,
         block: &BlockInfo,
     ) -> anyhow::Result<ParserResult> {
+        // take the inner instructions for the jupiter program index
+        // these instructions contain swap events.
         let inner_instructions = tx
             .get_transaction_meta()
             .clone()
@@ -50,13 +52,22 @@ impl Parser for JupiterV6Parser {
         }
 
         match swap_events.len().cmp(&1) {
+            // if there are no swap events, nothing to do here
             Ordering::Less => Ok(ParserResult {
                 parsed: false,
                 ix_type: "".to_string(),
                 data: ParserResultData::NoData,
             }),
+            // if there is one swap event, then there are no intermediate swaps
+            // single swap event only
             Ordering::Equal => parse_swap_instruction(swap_events.pop().unwrap(), block, tx),
             Ordering::Greater => {
+                // if there are multiple swap events,
+                // for example, token_1 -> SOL -> token_2 -> token_3
+                // we only care about the token_1 and token_3 swap
+                // capture all the input and output swap event
+                // example: inputs -> [token_1, SOL, token_2]
+                //          outputs -> [SOL, token_2, token_3]
                 let (mut inputs, mut outputs) = swap_events.into_iter().fold(
                     (HashMap::new(), HashMap::new()),
                     |mut acc, swap| {
@@ -74,6 +85,8 @@ impl Parser for JupiterV6Parser {
                     },
                 );
 
+                // collect all the comment tokens between inputs and output
+                // Example: common keys -> [SOL, token_2]
                 let common_keys: Vec<_> = inputs
                     .iter()
                     .filter_map(|(key, _)| {
@@ -85,11 +98,18 @@ impl Parser for JupiterV6Parser {
                     })
                     .collect();
 
+                // remove all the common tokens between inputs and outputs
                 for key in common_keys {
                     inputs.remove(&key);
                     outputs.remove(&key);
                 }
 
+                // once the common keys are removed from inputs and output
+                // inputs and outputs will contain just first token_in and last token_out respectively
+                // Example: Inputs -> [token_1]
+                //          Outputs -> [token_3]
+                // we create a swap event with input token and output token.
+                // we just the first token from input and output using `next`
                 let input = inputs.into_iter().next().ok_or(anyhow!("Invalid swap"))?;
                 let output = outputs.into_iter().next().ok_or(anyhow!("Invalid swap"))?;
                 let swap_event = SwapEvent {
