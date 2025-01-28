@@ -6,7 +6,6 @@ use anyhow::anyhow;
 use arctis_types::{BlockInfo, DexType, ParserResult, ParserResultData, SwapInfo, SwapType};
 use carbon_core::deserialize::CarbonDeserialize;
 use carbon_jupiter_swap_decoder::instructions::swap_event::SwapEvent;
-use solana_transaction_status::UiInstruction;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
@@ -21,35 +20,17 @@ impl Parser for JupiterV6Parser {
     ) -> anyhow::Result<ParserResult> {
         // take the inner instructions for the jupiter program index
         // these instructions contain swap events.
-        let inner_instructions = tx
-            .get_transaction_meta()
-            .clone()
-            .inner_instructions
-            .unwrap()
+        let mut swap_events = tx
+            .get_compiled_inner_instructions_for_instruction(ix.ix_idx as u8)?
             .into_iter()
-            .filter_map(|inner| {
-                if inner.index == ix.ix_idx as u8 {
-                    Some(inner.instructions)
+            .filter_map(|ix| {
+                if let Ok(data) = solana_sdk::bs58::decode(&ix.data).into_vec() {
+                    SwapEvent::deserialize(&data)
                 } else {
                     None
                 }
             })
-            .flatten()
-            .collect::<Vec<UiInstruction>>();
-
-        let mut swap_events = vec![];
-        for inner_instruction in inner_instructions {
-            match inner_instruction {
-                UiInstruction::Compiled(ix)
-                    if let Ok(data) = solana_sdk::bs58::decode(&ix.data).into_vec() =>
-                {
-                    if let Some(swap_event) = SwapEvent::deserialize(&data) {
-                        swap_events.push(swap_event);
-                    }
-                }
-                _ => continue,
-            }
-        }
+            .collect::<Vec<SwapEvent>>();
 
         match swap_events.len().cmp(&1) {
             // if there are no swap events, nothing to do here

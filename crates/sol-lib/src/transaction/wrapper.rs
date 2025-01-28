@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use arctis_types::SplTokenTransfer;
 use solana_sdk::transaction::TransactionVersion;
 use solana_transaction_status::option_serializer::OptionSerializer;
 use solana_transaction_status::{
-    EncodedTransactionWithStatusMeta, UiCompiledInstruction, UiRawMessage, UiTransaction,
-    UiTransactionStatusMeta,
+    EncodedTransactionWithStatusMeta, UiCompiledInstruction, UiInstruction, UiRawMessage,
+    UiTransaction, UiTransactionStatusMeta,
 };
 
 use super::helper::{
@@ -115,6 +115,31 @@ impl TransactionWrapper {
 
     pub fn get_inner_instructions(&self, program_id: &str) -> Result<Vec<UiCompiledInstruction>> {
         get_inner_instructions(&self.tx, program_id)
+    }
+
+    pub fn get_compiled_inner_instructions_for_instruction(
+        &self,
+        ix_idx: u8,
+    ) -> Result<Vec<UiCompiledInstruction>> {
+        Ok(self
+            .get_transaction_meta()
+            .clone()
+            .inner_instructions
+            .ok_or(anyhow!("failed to get transaction meta"))?
+            .into_iter()
+            .filter_map(|inner| {
+                if inner.index == ix_idx {
+                    Some(inner.instructions)
+                } else {
+                    None
+                }
+            })
+            .flatten()
+            .filter_map(|ix| match ix {
+                UiInstruction::Compiled(ix) => Some(ix),
+                UiInstruction::Parsed(_) => None,
+            })
+            .collect::<Vec<UiCompiledInstruction>>())
     }
 
     pub fn get_account_lookup(&self) -> HashMap<String, TokenAccountInfo> {
