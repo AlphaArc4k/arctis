@@ -1169,6 +1169,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "carbon-jupiter-swap-decoder"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "10397ddddf073b2cd6a8a839034ba162a5c69830a8b5391d3c927933585f82da"
+dependencies = [
+ "carbon-core",
+ "serde",
+ "solana-sdk",
+]
+
+[[package]]
 name = "carbon-macros"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4780,10 +4791,12 @@ dependencies = [
  "base64 0.22.1",
  "bincode",
  "carbon-core",
+ "carbon-jupiter-swap-decoder",
  "carbon-raydium-amm-v4-decoder",
  "chrono",
  "dotenvy",
  "futures",
+ "indexmap",
  "mpl-token-metadata",
  "regex",
  "reqwest 0.12.12",

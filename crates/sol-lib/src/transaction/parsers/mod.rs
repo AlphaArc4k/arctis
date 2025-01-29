@@ -9,5 +9,6 @@ pub mod system_program;
 pub mod token_program;
 
 // Dexes
+mod jupiter;
 pub mod pumpfun;
 pub mod raydium;
